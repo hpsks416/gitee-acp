@@ -7,6 +7,7 @@
 - 识别 Gitee 远端（`gitee` / 指向 `gitee.com` 的 `origin`），缺失时引导补上。
 - 用 `<emoji> <type>(<scope>): <subject>` 组装提交信息，内置 11 种类型与 emoji 映射。
 - 一键暂存、提交、推送到 Gitee，兼容 `master`/`main`。
+- 新建 Gitee 仓库默认公开，建仓后校验可见性，若被建成私有则自动 PATCH 为公开。
 - 内置 Gitee 专属的 TLS / 凭据兜底：OpenSSL 后端、私人令牌内联推送、API 最后兜底。
 - 凭据只从环境变量 `GITEE_USERNAME` / `GITEE_TOKEN` 读取，不落盘。
 
