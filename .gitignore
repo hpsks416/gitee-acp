@@ -1,14 +1,10 @@
-# user credentials and runtime state
-.env
-*.token
-
-# python
-__pycache__/
-*.pyc
-
-# archives
-*.zip
-
-# OS junk
-.DS_Store
+# OS
 Thumbs.db
+.DS_Store
+
+# Editor
+.vscode/
+.idea/
+
+# PowerShell / temp
+*.log

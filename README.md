@@ -1,45 +1,64 @@
 # gitee-acp
 
-一个 Codex 专用技能：把“提交到 Gitee / 推送到码云”变成一条安全的 `git add` → `git commit` → push 流程，提交信息使用 Conventional Commits + Gitmoji。
+One-click `git add` → `commit` → `push` to a **Gitee** repository, packaged as a Codex skill that delegates to a single bundled PowerShell script.
 
-## 功能
+The goal is to reduce per-request token cost: instead of the skill instructing the model to run a dozen `git` commands and reason about each one, the model just picks a Conventional Commits type and runs one script call.
 
-- 识别 Gitee 远端（`gitee` / 指向 `gitee.com` 的 `origin`），缺失时引导补上。
-- 用 `<emoji> <type>(<scope>): <subject>` 组装提交信息，内置 11 种类型与 emoji 映射。
-- 一键暂存、提交、推送到 Gitee，兼容 `master`/`main`。
-- 新建 Gitee 仓库默认公开，建仓后校验可见性，若被建成私有则自动 PATCH 为公开。
-- 内置 Gitee 专属的 TLS / 凭据兜底：OpenSSL 后端、私人令牌内联推送、API 最后兜底。
-- 凭据只从环境变量 `GITEE_USERNAME` / `GITEE_TOKEN` 读取，不落盘。
+## What it does
 
-## 安装为 Codex 技能
+- Detects the Gitee remote automatically (`gitee` or `origin` pointing to `gitee.com`).
+- Builds a Conventional Commits message with a leading Gitmoji.
+- Stages, commits, and optionally pushes to Gitee.
+- Writes the commit message to a UTF-8 file so emoji and non-ASCII subjects survive any shell.
 
-把 `SKILL.md`、`agents/`、`references/` 复制到 `$CODEX_HOME/skills/gitee-acp/`（默认 `~/.codex/skills/gitee-acp/`），下个会话即可用“提交到 Gitee”触发，或显式 `$gitee-acp`。
-
-## 目录结构
+## Layout
 
 ```
 gitee-acp/
-├── SKILL.md                 # 技能入口与工作流
-├── agents/openai.yaml       # 界面元数据
-├── references/gitee-push.md # Gitee 推送与凭据兜底
-├── LICENSE                  # MIT
-└── README.md
+├── SKILL.md                  # the Codex skill (concise; delegates to the script)
+├── scripts/
+│   └── gitee-acp.ps1         # the actual implementation
+├── agents/openai.yaml        # skill interface metadata
+└── references/gitee-push.md  # credential / TLS fallback notes
 ```
 
-## 快速开始（直接当脚本用）
+## Install
 
-无需安装依赖，按 `SKILL.md` 的流程执行即可；关键命令：
+Copy the whole folder into your Codex skills directory:
 
-```bash
-git add -A
-git commit -m "✨ feat: 初始化"
-git push -u gitee master
+```powershell
+robocopy "gitee-acp" "C:\Users\<you>\.codex\skills\gitee-acp" /E
 ```
 
-## 许可证
+## Usage
 
-本项目采用 [MIT License](LICENSE)。
+From the repository root:
 
-## 免责声明
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File "<skill_dir>\scripts\gitee-acp.ps1" `
+  -Type feat -Scope export -Subject "add STEP exporter" -Push
+```
 
-本技能会执行真实的 `git add / commit / push`，请在推送前确认目标仓库与提交信息无误，并妥善保管私人令牌。
+Parameters:
+
+| flag | meaning |
+| --- | --- |
+| `-Type` | Conventional Commits type (required) |
+| `-Scope` | optional scope |
+| `-Subject` | short imperative subject (required) |
+| `-Body` | optional body lines |
+| `-Breaking` | add `!` and a `BREAKING CHANGE:` footer |
+| `-Paths` | specific files to stage (default: all) |
+| `-Remote` / `-Branch` | override auto-detected remote / branch |
+| `-Push` | push after commit (default: commit only) |
+| `-NoEmoji` | omit the Gitmoji prefix |
+
+## Requirements
+
+- `git` on `PATH`
+- PowerShell (Windows PowerShell or PowerShell 7)
+- For pushing over HTTPS, `GITEE_USERNAME` and `GITEE_TOKEN` (a Gitee personal access token)
+
+## Safety
+
+The script defaults to commit-only; it only pushes when `-Push` is passed. It never force-pushes, never writes credentials into repo config, and stops on the first failing step.
