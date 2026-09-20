@@ -7,6 +7,19 @@ Use this when the Gitee push fails or when credentials are needed. Read only the
 - HTTPS: `https://gitee.com/<owner>/<repo>.git`
 - SSH: `git@gitee.com:<owner>/<repo>.git`
 
+## Create a new repository (public by default)
+
+When the target Gitee repo does not exist yet, create it with the OpenAPI. Default to public unless the user explicitly asked for private:
+
+```text
+POST https://gitee.com/api/v5/user/repos
+form: access_token=$GITEE_TOKEN, name=<repo>, private=false, auto_init=false
+```
+
+- `private=false` means public (公开); set `private=true` only when the user explicitly asks for a private repo.
+- Use `auto_init=false` so the first push can set branches cleanly.
+- If the API reports the repo already exists, skip creation and just push.
+
 ## HTTPS credentials
 
 Gitee HTTPS uses a **username** plus a **personal access token** as the password (a plain login password does not work for git operations).
