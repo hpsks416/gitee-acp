@@ -1,6 +1,6 @@
 ---
 name: gitee-acp
-description: One-click git add/commit/push to a Gitee (gitee.com) repository: stage changes, write a Conventional Commits + Gitmoji message, commit, and push to Gitee. Use when the user asks to commit or submit work to Gitee.
+description: "One-click git add/commit/push to a Gitee (gitee.com) repository: stage changes, write a Conventional Commits + Gitmoji message, commit, and push to Gitee. Use when the user asks to commit or submit work to Gitee."
 ---
 
 # Gitee ACP (One-Click Commit to Gitee)
@@ -10,7 +10,7 @@ Turn a "提交到 Gitee / 推送到码云" request into one safe, deterministic 
 ## Workflow
 
 1. Inspect first. Run `git status --porcelain=v1 -b`, `git branch --show-current`, and `git remote -v`. Identify the Gitee remote (usually named `gitee` or `origin` pointing to `gitee.com`).
-2. Resolve the target repo. If no Gitee remote exists, find or create the Gitee repository — creating a new one defaults to public — then add it with `git remote add gitee <url>`. See `references/gitee-push.md` for the create call.
+2. Resolve the target repo. If no Gitee remote exists, find or create the Gitee repository — creating a new one defaults to public — verify visibility and force public if Gitee returned private, then add it with `git remote add gitee <url>`. See `references/gitee-push.md` for the create and verify calls.
 3. Build the message. Pick the closest type from the table below, add an optional scope, keep the subject imperative and short. Add `!` and a `BREAKING CHANGE:` footer only for breaking changes.
 4. Stage with `git add -A`, unless the user named specific paths.
 5. Commit with `git commit -m "<emoji> <type>(<scope>): <subject>"`.
@@ -38,6 +38,6 @@ Turn a "提交到 Gitee / 推送到码云" request into one safe, deterministic 
 - Never force-push (`--force`, `-f`) unless the user explicitly asked.
 - Never commit secrets, `.env`, credentials, or large binaries; report them instead.
 - Gitee credentials are a username plus a personal access token, never a plain password. Read them from `GITEE_USERNAME` and `GITEE_TOKEN`, and never write them into repo config.
-- New Gitee repositories default to public (`private: false`); set `private: true` only when the user explicitly asks for a private repo.
+- New Gitee repositories default to public (`private: false`); after creating, verify with the GET API and PATCH `private=false` if Gitee returned private (set `private: true` only when the user explicitly asks).
 - If a step fails, show the git output and stop; do not retry blindly.
 - For TLS or credential failures, read [references/gitee-push.md](references/gitee-push.md).
