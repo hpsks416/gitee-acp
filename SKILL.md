@@ -48,12 +48,20 @@ powershell -NoProfile -ExecutionPolicy Bypass -File "<skill_dir>\scripts\gitee-a
 | chore | 🔧 | maintenance, no production code |
 | revert | ⏪ | reverting a commit |
 
+## License Default
+
+When the user asks to create or initialize a Gitee repository and has not specified a license, default to MIT:
+
+- Add a `LICENSE` file with the current year and the repository owner's name (and email if provided) as the copyright holder.
+- Update the `README.md` license section to reference MIT.
+- Do not change an existing license without being asked.
+
 ## Safety
 
 - Only push when the user asked to push; a bare "提交" means commit only.
 - Never force-push (`--force`, `-f`) unless the user explicitly asked.
 - Never commit secrets, `.env`, credentials, or large binaries; report them instead.
 - Gitee credentials come from `GITEE_USERNAME` and `GITEE_TOKEN` (or gacpee-studio `config.json`); never write them into repo config.
-- New Gitee repositories default to public; after creating, verify with the GET API and PATCH `private=false` if Gitee returned private (set `private: true` only when the user explicitly asks).
+- New Gitee repositories default to public + MIT; after creating, verify with the GET API and PATCH `private=false` if Gitee returned private (set `private: true` only when the user explicitly asks), and ensure a MIT `LICENSE` file exists before the first push.
 - If a step fails, show the output and stop; do not retry blindly.
 - For TLS or credential failures, read [references/gitee-push.md](references/gitee-push.md).

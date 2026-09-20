@@ -7,18 +7,37 @@ Use this when the Gitee push fails or when credentials are needed. Read only the
 - HTTPS: `https://gitee.com/<owner>/<repo>.git`
 - SSH: `git@gitee.com:<owner>/<repo>.git`
 
-## Create a new repository (public by default)
+## Create a new repository (public + MIT by default)
 
-When the target Gitee repo does not exist yet, create it with the OpenAPI. Default to public unless the user explicitly asked for private:
+When the target Gitee repo does not exist yet, create it with the OpenAPI. Default to public and MIT unless the user explicitly asked otherwise:
 
 ```text
 POST https://gitee.com/api/v5/user/repos
 form: access_token=$GITEE_TOKEN, name=<repo>, private=false, auto_init=false
 ```
 
-- `private=false` means public; set `private=true` only when the user explicitly asks for a private repo.
+- `private=false` means public (公开); set `private=true` only when the user explicitly asks for a private repo.
+- License defaults to MIT. With `auto_init=false` the repo starts empty, so add a MIT `LICENSE` file to the project before the first push (current year + owner name/email). To have Gitee generate it instead, create with `auto_init=true&license_template=MIT`.
 - Use `auto_init=false` so the first push can set branches cleanly.
 - If the API reports the repo already exists, skip creation and just push.
+
+### Verify visibility and force public
+
+Gitee sometimes creates a repo as private even when `private=false` was sent. After creating, always verify and correct it:
+
+```text
+GET https://gitee.com/api/v5/repos/<owner>/<repo>
+query: access_token=$GITEE_TOKEN
+```
+
+- If the response `private` is `true`, the create defaulted to private — PATCH it back to public (the PATCH endpoint requires `name` as well):
+
+```text
+PATCH https://gitee.com/api/v5/repos/<owner>/<repo>
+form: access_token=$GITEE_TOKEN, name=<repo>, private=false
+```
+
+- Re-check `private` is `false` after the PATCH before pushing.
 
 ## HTTPS credentials
 

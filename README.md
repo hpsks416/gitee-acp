@@ -13,7 +13,7 @@ The goal is to reduce per-request token cost: instead of the skill instructing t
 
 - Preferred path: start gacpee-studio headless and use its compact JSON API (`/api/repo`, `/api/commit`, `/api/push`) to reduce token usage.
 - Fallback path: run the bundled `scripts/gitee-acp.ps1` in a single call; it detects the Gitee remote, builds a Conventional Commits + Gitmoji message, and stages/commits/pushes.
-- New Gitee repositories default to public; after creation, verify visibility and force public if Gitee returned private.
+- New Gitee repositories default to public + MIT; after creation, verify visibility and force public if Gitee returned private.
 
 ## Layout
 
