@@ -20,6 +20,24 @@ form: access_token=$GITEE_TOKEN, name=<repo>, private=false, auto_init=false
 - Use `auto_init=false` so the first push can set branches cleanly.
 - If the API reports the repo already exists, skip creation and just push.
 
+### Verify visibility and force public
+
+Gitee sometimes creates a repo as private even when `private=false` was sent. After creating, verify and correct it:
+
+```text
+GET https://gitee.com/api/v5/repos/<owner>/<repo>
+query: access_token=$GITEE_TOKEN
+```
+
+- If the response `private` is `true`, the create defaulted to private — PATCH it back to public (the PATCH endpoint requires `name` as well):
+
+```text
+PATCH https://gitee.com/api/v5/repos/<owner>/<repo>
+form: access_token=$GITEE_TOKEN, name=<repo>, private=false
+```
+
+- Re-check `private` is `false` after the PATCH before pushing.
+
 ## HTTPS credentials
 
 Gitee HTTPS uses a **username** plus a **personal access token** as the password (a plain login password does not work for git operations).
